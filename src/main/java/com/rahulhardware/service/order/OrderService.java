@@ -5,19 +5,26 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.rahulhardware.dto.order.OrderDetailsResponse;
 import com.rahulhardware.dto.order.OrderItemRequest;
 import com.rahulhardware.dto.order.OrderRequest;
 import com.rahulhardware.entity.CustomerOrder;
 import com.rahulhardware.entity.OrderItem;
+import com.rahulhardware.entity.UserAddress;
 import com.rahulhardware.repository.CustomerOrderRepository;
+import com.rahulhardware.repository.UserAddressRepository;
 
 @Service
 public class OrderService {
 
     private final CustomerOrderRepository orderRepository;
+    private final UserAddressRepository addressRepository;
 
-    public OrderService(CustomerOrderRepository orderRepository) {
+    public OrderService(
+            CustomerOrderRepository orderRepository,
+            UserAddressRepository addressRepository) {
         this.orderRepository = orderRepository;
+        this.addressRepository = addressRepository;
     }
 
     public CustomerOrder createOrder(OrderRequest request) {
@@ -68,11 +75,53 @@ public class OrderService {
         return orderRepository.findByUserMobileOrderByCreatedAtDesc(userMobile);
     }
 
-    public CustomerOrder getOrderById(String userMobile, Long orderId) {
-    return orderRepository
-            .findByIdAndUserMobile(orderId, userMobile)
-            .orElseThrow(() -> new RuntimeException("Order not found"));
-}
+    public OrderDetailsResponse getOrderById(
+            String userMobile,
+            Long orderId) {
+
+        CustomerOrder order = orderRepository
+                .findByIdAndUserMobile(orderId, userMobile)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        UserAddress address = addressRepository
+                .findById(order.getAddressId())
+                .orElse(null);
+
+        OrderDetailsResponse response = new OrderDetailsResponse();
+
+        response.setId(order.getId());
+        response.setOrderNumber(order.getOrderNumber());
+
+        response.setPaymentMethod(order.getPaymentMethod());
+        response.setPaymentStatus(order.getPaymentStatus());
+        response.setOrderStatus(order.getOrderStatus());
+
+        response.setSubtotalAmount(order.getSubtotalAmount());
+        response.setDeliveryCharge(order.getDeliveryCharge());
+        response.setPlatformFee(order.getPlatformFee());
+        response.setTotalAmount(order.getTotalAmount());
+
+        response.setCreatedAt(order.getCreatedAt());
+
+        response.setItems(order.getItems());
+
+        if (address != null) {
+
+            response.setCustomerName(
+                    (address.getFirstName() == null ? "" : address.getFirstName())
+                            + " "
+                            + (address.getLastName() == null ? "" : address.getLastName()));
+
+            response.setCustomerMobile(address.getMobile());
+
+            response.setFullAddress(address.getFullAddress());
+            response.setCity(address.getCity());
+            response.setState(address.getState());
+            response.setPinCode(address.getPinCode());
+        }
+
+        return response;
+    }
 
     private String defaultValue(String value, String fallback) {
         return value == null || value.isBlank() ? fallback : value;

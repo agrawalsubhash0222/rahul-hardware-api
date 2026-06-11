@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.rahulhardware.dto.order.OrderDetailsResponse;
 import com.rahulhardware.dto.order.OrderRequest;
 import com.rahulhardware.entity.CustomerOrder;
 import com.rahulhardware.service.order.OrderService;
@@ -36,10 +37,9 @@ public class OrderController {
     }
 
     @GetMapping("/{mobile}/{orderId}")
-    public CustomerOrder getOrderById(
+    public OrderDetailsResponse getOrderById(
             @PathVariable String mobile,
-            @PathVariable Long orderId
-    ) {
+            @PathVariable Long orderId) {
         return orderService.getOrderById(mobile, orderId);
     }
 }
