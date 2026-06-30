@@ -28,8 +28,9 @@ public class ProfileController {
 
     @GetMapping("/{mobile}")
     public ResponseEntity<?> getProfile(@PathVariable String mobile) {
+        String cleanMobile = normalizeMobile(mobile);
 
-        User user = findUserByMobile(mobile);
+        User user = findUserByMobile(cleanMobile);
 
         return ResponseEntity.ok(user);
     }
@@ -70,6 +71,19 @@ public class ProfileController {
         User savedUser = userRepository.save(user);
 
         return ResponseEntity.ok(savedUser);
+    }
+
+    private String normalizeMobile(String mobile) {
+        if (mobile == null)
+            return "";
+
+        String clean = mobile.replaceAll("\\D", "");
+
+        if (clean.length() > 10) {
+            clean = clean.substring(clean.length() - 10);
+        }
+
+        return clean;
     }
 
     private User findUserByMobile(String mobile) {

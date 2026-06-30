@@ -31,7 +31,8 @@ public class UserCartController {
 
     @GetMapping("/{mobile}")
     public ResponseEntity<List<CartItemResponse>> getCart(@PathVariable String mobile) {
-        return ResponseEntity.ok(repository.findCartItemsWithProductDetails(mobile));
+        String cleanMobile = normalizeMobile(mobile);
+        return ResponseEntity.ok(repository.findCartItemsWithProductDetails(cleanMobile));
     }
 
     @PostMapping("/{mobile}/add")
@@ -81,6 +82,19 @@ public class UserCartController {
     @Transactional
     public ResponseEntity<Map<String, Object>> clearCartLegacy(@PathVariable String mobile) {
         return clearCart(mobile);
+    }
+
+    private String normalizeMobile(String mobile) {
+        if (mobile == null)
+            return "";
+
+        String clean = mobile.replaceAll("\\D", "");
+
+        if (clean.length() > 10) {
+            clean = clean.substring(clean.length() - 10);
+        }
+
+        return clean;
     }
 
     private Integer parseQuantity(Object quantityValue) {
