@@ -40,8 +40,7 @@ public class OrderController {
 
     @GetMapping("/{mobile}")
     public List<CustomerOrder> getOrdersByMobile(@PathVariable String mobile) {
-        String cleanMobile = normalizeMobile(mobile);
-        return orderService.getOrdersByUserMobile(cleanMobile);
+        return orderService.getOrdersByUserMobile(mobile);
     }
 
     @GetMapping("/{mobile}/{orderId}")
@@ -52,42 +51,32 @@ public class OrderController {
     }
 
     @GetMapping("/{mobile}/{orderId}/invoice")
-    public ResponseEntity<byte[]> downloadInvoice(
-            @PathVariable String mobile,
-            @PathVariable Long orderId) {
-        byte[] pdfBytes = orderService.generateInvoicePdf(mobile, orderId);
+public ResponseEntity<byte[]> downloadInvoice(
+        @PathVariable String mobile,
+        @PathVariable Long orderId
+) {
+    byte[] pdfBytes = orderService.generateInvoicePdf(mobile, orderId);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_PDF);
-        headers.setContentDisposition(
-                ContentDisposition.attachment()
-                        .filename("invoice-order-" + orderId + ".pdf")
-                        .build());
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_PDF);
+    headers.setContentDisposition(
+            ContentDisposition.attachment()
+                    .filename("invoice-order-" + orderId + ".pdf")
+                    .build()
+    );
 
-        return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
-    }
+    return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+}
 
-    @PatchMapping("/{orderId}/status")
-    public Object updateCustomerOrderStatus(
-            @PathVariable Long orderId,
-            @RequestBody CustomerOrderStatusUpdateRequest request) {
-        return orderService.updateCustomerOrderStatus(
-                orderId,
-                request.getStatus(),
-                request.getReason(),
-                request.getCustomerRemark());
-    }
-
-    private String normalizeMobile(String mobile) {
-        if (mobile == null)
-            return "";
-
-        String clean = mobile.replaceAll("\\D", "");
-
-        if (clean.length() > 10) {
-            clean = clean.substring(clean.length() - 10);
-        }
-
-        return clean;
-    }
+@PatchMapping("/{orderId}/status")
+public Object updateCustomerOrderStatus(
+        @PathVariable Long orderId,
+        @RequestBody CustomerOrderStatusUpdateRequest request) {
+    return orderService.updateCustomerOrderStatus(
+            orderId,
+            request.getStatus(),
+            request.getReason(),
+            request.getCustomerRemark()
+    );
+}
 }
