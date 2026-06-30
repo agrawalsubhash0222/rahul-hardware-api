@@ -23,7 +23,7 @@ import com.rahulhardware.entity.CustomerOrder;
 import com.rahulhardware.service.order.OrderService;
 
 @RestController
-@RequestMapping("/api/orders")
+@RequestMapping(value = "/api/orders", produces = MediaType.APPLICATION_JSON_VALUE)
 @CrossOrigin("*")
 public class OrderController {
 
@@ -33,7 +33,7 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public CustomerOrder createOrder(@RequestBody OrderRequest request) {
         return orderService.createOrder(request);
     }
@@ -50,33 +50,35 @@ public class OrderController {
         return orderService.getOrderById(mobile, orderId);
     }
 
-    @GetMapping("/{mobile}/{orderId}/invoice")
-public ResponseEntity<byte[]> downloadInvoice(
-        @PathVariable String mobile,
-        @PathVariable Long orderId
-) {
-    byte[] pdfBytes = orderService.generateInvoicePdf(mobile, orderId);
+    @GetMapping(value = "/{mobile}/{orderId}/invoice", produces = MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity<byte[]> downloadInvoice(
+            @PathVariable String mobile,
+            @PathVariable Long orderId) {
 
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_PDF);
-    headers.setContentDisposition(
-            ContentDisposition.attachment()
-                    .filename("invoice-order-" + orderId + ".pdf")
-                    .build()
-    );
+        byte[] pdfBytes = orderService.generateInvoicePdf(mobile, orderId);
 
-    return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
-}
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDisposition(
+                ContentDisposition.attachment()
+                        .filename("invoice-order-" + orderId + ".pdf")
+                        .build());
 
-@PatchMapping("/{orderId}/status")
-public Object updateCustomerOrderStatus(
-        @PathVariable Long orderId,
-        @RequestBody CustomerOrderStatusUpdateRequest request) {
-    return orderService.updateCustomerOrderStatus(
-            orderId,
-            request.getStatus(),
-            request.getReason(),
-            request.getCustomerRemark()
-    );
-}
+        return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+    }
+
+    @PatchMapping(
+            value = "/{orderId}/status",
+            consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public Object updateCustomerOrderStatus(
+            @PathVariable Long orderId,
+            @RequestBody CustomerOrderStatusUpdateRequest request) {
+
+        return orderService.updateCustomerOrderStatus(
+                orderId,
+                request.getStatus(),
+                request.getReason(),
+                request.getCustomerRemark());
+    }
 }
