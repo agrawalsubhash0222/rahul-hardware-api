@@ -28,6 +28,7 @@ public interface UserCartItemRepository extends JpaRepository<UserCartItem, Long
         ORDER BY c.updatedAt DESC
     """)
     List<CartItemResponse> findCartItemsWithProductDetails(String userMobile);
+    List<UserCartItem> findByUserMobile(String userMobile);
 
     @Modifying
     @Transactional

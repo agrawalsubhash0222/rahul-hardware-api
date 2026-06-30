@@ -1,7 +1,9 @@
 package com.rahulhardware.controller.inventory;
 
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -59,8 +61,7 @@ public class InventoryController {
     @PutMapping("/{id}")
     public InventoryStock updateStock(
             @PathVariable Long id,
-            @RequestBody InventoryStock request
-    ) {
+            @RequestBody InventoryStock request) {
         InventoryStock stock = inventoryRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Inventory not found"));
 
@@ -90,5 +91,13 @@ public class InventoryController {
     public String uploadInventoryDocument(@RequestParam("file") MultipartFile file) {
         // Phase 2: OCR / Excel / PDF parser will be added here.
         return "File received: " + file.getOriginalFilename();
+    }
+
+    @DeleteMapping("/{productId}")
+    public ResponseEntity<?> deleteProduct(@PathVariable Long productId) {
+        deleteProduct(productId);
+
+        return ResponseEntity.ok(Map.of(
+                "message", "Product deleted successfully"));
     }
 }

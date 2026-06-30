@@ -9,4 +9,6 @@ import com.rahulhardware.entity.SubCategory;
 public interface SubCategoryRepository extends JpaRepository<SubCategory, String> {
 
     List<SubCategory> findByCategoryIdAndActiveTrueOrderByDisplayOrderAsc(String categoryId);
+
+    List<SubCategory> findByActiveTrueOrderByDisplayOrderAsc();
 }

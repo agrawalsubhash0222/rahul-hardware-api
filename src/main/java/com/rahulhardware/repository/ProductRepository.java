@@ -9,9 +9,11 @@ import com.rahulhardware.entity.Product;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
-    List<Product> findBySubCategoryIdAndActiveTrue(String subCategoryId);
-
     List<Product> findByActiveTrue();
+
+    List<Product> findByCategoryIdAndActiveTrue(String categoryId);
+
+    List<Product> findBySubCategoryIdAndActiveTrue(String subCategoryId);
 
     Optional<Product> findFirstByNameIgnoreCase(String name);
 }

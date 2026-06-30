@@ -3,6 +3,7 @@ package com.rahulhardware.controller;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,36 +30,65 @@ public class UserCartController {
     }
 
     @GetMapping("/{mobile}")
-    public List<CartItemResponse> getCart(@PathVariable String mobile) {
-        return repository.findCartItemsWithProductDetails(mobile);
+    public ResponseEntity<List<CartItemResponse>> getCart(@PathVariable String mobile) {
+        return ResponseEntity.ok(repository.findCartItemsWithProductDetails(mobile));
     }
 
     @PostMapping("/{mobile}/add")
     @Transactional
-    public void addToCart(
+    public ResponseEntity<Map<String, Object>> addToCart(
             @PathVariable String mobile,
-            @RequestBody Map<String, Object> body
-    ) {
-        String productId = String.valueOf(body.get("productId"));
-        Integer quantity = Integer.parseInt(
-                String.valueOf(body.getOrDefault("quantity", 1))
-        );
+            @RequestBody Map<String, Object> body) {
+        Object productIdValue = body.get("productId");
+        if (productIdValue == null || String.valueOf(productIdValue).isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", "productId is required"));
+        }
+
+        String productId = String.valueOf(productIdValue).trim();
+        Integer quantity = parseQuantity(body.getOrDefault("quantity", 1));
 
         repository.upsertCartItem(mobile, productId, quantity);
+
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Cart updated"));
     }
 
     @DeleteMapping("/{mobile}/remove/{productId}")
     @Transactional
-    public void removeItem(
+    public ResponseEntity<Map<String, Object>> removeItem(
             @PathVariable String mobile,
-            @PathVariable String productId
-    ) {
+            @PathVariable String productId) {
         repository.deleteByUserMobileAndProductId(mobile, productId);
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Item removed from cart"));
     }
 
     @DeleteMapping("/{mobile}/clear")
     @Transactional
-    public void clearCart(@PathVariable String mobile) {
+    public ResponseEntity<Map<String, Object>> clearCart(@PathVariable String mobile) {
         repository.deleteByUserMobile(mobile);
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Cart cleared"));
+    }
+
+    // Backward-compatible alias for older frontend calls: /api/cart/clear/{mobile}
+    @DeleteMapping("/clear/{mobile}")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> clearCartLegacy(@PathVariable String mobile) {
+        return clearCart(mobile);
+    }
+
+    private Integer parseQuantity(Object quantityValue) {
+        try {
+            int quantity = Integer.parseInt(String.valueOf(quantityValue));
+            return quantity;
+        } catch (Exception ignored) {
+            return 1;
+        }
     }
 }
