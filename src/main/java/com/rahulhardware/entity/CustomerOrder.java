@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -95,7 +96,7 @@ public class CustomerOrder {
     private String customerRemark;
 
     @JsonManagedReference
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<OrderItem> items = new ArrayList<>();
 
     @PrePersist
@@ -431,34 +432,34 @@ public class CustomerOrder {
     }
 
     public LocalDateTime getReturnCancelledAt() {
-    return returnCancelledAt;
-}
+        return returnCancelledAt;
+    }
 
-public void setReturnCancelledAt(LocalDateTime returnCancelledAt) {
-    this.returnCancelledAt = returnCancelledAt;
-}
+    public void setReturnCancelledAt(LocalDateTime returnCancelledAt) {
+        this.returnCancelledAt = returnCancelledAt;
+    }
 
-public LocalDateTime getReplacementCancelledAt() {
-    return replacementCancelledAt;
-}
+    public LocalDateTime getReplacementCancelledAt() {
+        return replacementCancelledAt;
+    }
 
-public void setReplacementCancelledAt(LocalDateTime replacementCancelledAt) {
-    this.replacementCancelledAt = replacementCancelledAt;
-}
+    public void setReplacementCancelledAt(LocalDateTime replacementCancelledAt) {
+        this.replacementCancelledAt = replacementCancelledAt;
+    }
 
-public String getReturnCancelReason() {
-    return returnCancelReason;
-}
+    public String getReturnCancelReason() {
+        return returnCancelReason;
+    }
 
-public void setReturnCancelReason(String returnCancelReason) {
-    this.returnCancelReason = returnCancelReason;
-}
+    public void setReturnCancelReason(String returnCancelReason) {
+        this.returnCancelReason = returnCancelReason;
+    }
 
-public String getReplacementCancelReason() {
-    return replacementCancelReason;
-}
+    public String getReplacementCancelReason() {
+        return replacementCancelReason;
+    }
 
-public void setReplacementCancelReason(String replacementCancelReason) {
-    this.replacementCancelReason = replacementCancelReason;
-}
+    public void setReplacementCancelReason(String replacementCancelReason) {
+        this.replacementCancelReason = replacementCancelReason;
+    }
 }
